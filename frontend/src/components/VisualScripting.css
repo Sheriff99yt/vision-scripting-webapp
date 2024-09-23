@@ -1,0 +1,25 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+
+const VisualScripting = () => {
+    const [nodes, setNodes] = useState([]);
+
+    const addNode = async () => {
+        try {
+            const newNode = { id: Date.now(), data: { label: 'New Node' }, position: { x: 0, y: 0 } };
+            const response = await axios.post('http://localhost:8000/nodes/', newNode);
+            setNodes((prevNodes) => [...prevNodes, response.data]);
+        } catch (error) {
+            console.error('Error adding node:', error);
+        }
+    };
+
+    return (
+        <div>
+            <button className="button" onClick={addNode}>Add Node</button>
+            {/* Add your node rendering logic here */}
+        </div>
+    );
+};
+
+export default VisualScripting;
