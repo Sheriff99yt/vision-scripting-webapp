@@ -1,32 +1,34 @@
 
+---
+
 # Vision Visual Scripting Web App
 
-This project is a web-based implementation of the Vision Visual Scripting application, allowing users to create visual programming workflows through a node-based interface. The app is designed with a focus on simplicity, functionality, and user-friendly UI/UX.
+This project is a private implementation of a visual scripting web app, providing users with a node-based interface for designing and connecting workflows. The app emphasizes a user-friendly, visually appealing UI with customizable dark and light modes.
 
 ## Features
-- **Node-Based Scripting:** Create, edit, and connect nodes to design custom logic workflows.
-- **Dark Mode and Light Mode Support:** Choose between eye-comforting dark and light themes.
-- **Save/Load Functionality:** Save your visual scripting workflows to your local machine as JSON files and reload them at any time.
-- **Customizable Node Design:** Nodes feature a clean, soft-shadow design with rounded corners for a modern look.
-- **Real-Time Node Interaction:** Drag and drop nodes, link them together, and visualize the logic flow in real-time.
-- **Toolbox Layout:** The toolbox from the previous version has been reimplemented for an intuitive design.
-- **Dynamic Ports:** Flexible port assignments to avoid conflicts during development.
+- **Node-Based Design:** Easily create, edit, and link nodes to develop workflows.
+- **Dark/Light Mode Toggle:** Switch between dark and light modes for optimal viewing.
+- **Local Save/Load Functionality:** Save and load scripts from local JSON files.
+- **Customizable Nodes:** Input, process, and output nodes with clean designs and soft shadows.
+- **Real-Time Node Management:** Drag and drop nodes to design workflows interactively.
+- **Toolbox Search:** Search and add different node types with a simple interface.
+- **Dynamic Ports:** Ensuring flexible port management for real-time connections.
 
 ## Technologies Used
-- **Frontend:** React, CSS (Tailwind CSS optional)
-- **Backend:** Temporarily disabled (FastAPI planned for server-side logic)
-- **Data Storage:** Local JSON files for save/load functionality
-- **Additional Tools:** WebSockets for real-time features (planned), OpenAI's API integration (planned)
+- **Frontend:** React, CSS (with Tailwind CSS support)
+- **Backend:** Temporarily disabled (FastAPI planned for future development)
+- **Data Storage:** JSON files for local saving and loading
+- **Additional Tools:** WebSockets and AI integrations planned for future updates
 
 ## Installation
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Sheriff99yt/vision-scripting-webapp.git
+   git clone <private-repo-link>
    ```
 2. Navigate to the project folder:
    ```bash
-   cd D:/Important/Programming/code_gpt/vision-scripting-webapp
+   cd /path/to/your/local/project
    ```
 3. Install dependencies:
    ```bash
@@ -36,15 +38,16 @@ This project is a web-based implementation of the Vision Visual Scripting applic
    ```bash
    npm start
    ```
-   The app will be accessible at `http://localhost:3000`.
+   The app will run on `http://localhost:3000`.
 
-## Future Plans
-- Re-enable FastAPI backend to handle server-side logic.
-- Expand node functionality with additional scripting options.
-- Implement real-time collaboration using WebSockets.
-- Add more customization options for node and toolbox layouts.
+## Future Updates
+- Integration of FastAPI for backend functionality.
+- Real-time collaboration through WebSockets.
+- More node customization and layout options.
+- AI-powered scripting assistance.
 
 ## License
-This project is licensed under the MIT License.
+This is a private project.
 
+---
 
