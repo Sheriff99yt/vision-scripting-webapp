@@ -1,25 +1,102 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+/* VisualScripting.css */
 
-const VisualScripting = () => {
-    const [nodes, setNodes] = useState([]);
+/* General App Styles */
+.app-container {
+    display: flex;
+    height: 100vh;
+    transition: background-color 0.3s ease; /* Smooth transition for background color */
+}
 
-    const addNode = async () => {
-        try {
-            const newNode = { id: Date.now(), data: { label: 'New Node' }, position: { x: 0, y: 0 } };
-            const response = await axios.post('http://localhost:8000/nodes/', newNode);
-            setNodes((prevNodes) => [...prevNodes, response.data]);
-        } catch (error) {
-            console.error('Error adding node:', error);
-        }
-    };
+.app-container.dark {
+    background-color: #1A1A1A; /* Dark background for the app */
+    color: #EAEAEA; /* Light text color for contrast */
+}
 
-    return (
-        <div>
-            <button className="button" onClick={addNode}>Add Node</button>
-            {/* Add your node rendering logic here */}
-        </div>
-    );
-};
+.app-container.light {
+    background-color: #F0F0F0; /* Light background for the app */
+    color: #333; /* Dark text color for contrast */
+}
 
-export default VisualScripting;
+.sidebar {
+    width: 250px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow */
+}
+
+.main-canvas {
+    flex-grow: 1;
+    position: relative;
+}
+
+/* Custom Node Styles */
+.custom-node {
+    background: #2C2C2C; /* Dark grey for the node */
+    color: #EAEAEA; /* Light text color */
+    padding: 10px;
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Soft shadow */
+    text-align: center; /* Center text in node */
+    width: 150px; /* Fixed width for nodes */
+}
+
+/* Specific node types */
+.input-node,
+.output-node,
+.process-node {
+    border: none; /* No border */
+}
+
+/* Handle Styles */
+.react-flow__handle {
+    background: #555; /* Darker handle color */
+    border-radius: 50%;
+    width: 10px;
+    height: 10px;
+}
+
+/* Button Styles */
+button {
+    background-color: #3C3C3C; /* Button background */
+    color: #EAEAEA; /* Button text color */
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Smooth background transition */
+}
+
+button:hover {
+    background-color: #4A4A4A; /* Button hover effect */
+}
+
+/* MiniMap and Controls Style Adjustments */
+.react-flow__controls {
+    background-color: rgba(255, 255, 255, 0.1); /* Translucent control background */
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); /* Soft shadow for controls */
+}
+
+/* Adjustments for the MiniMap */
+.react-flow__minimap {
+    background-color: #1A1A1A; /* Dark background for MiniMap */
+    border: 1px solid #333; /* Border color for MiniMap */
+}
+
+/* Light Mode Specific Styles */
+.app-container.light .custom-node {
+    background: #FFFFFF; /* Light background for nodes */
+    color: #333; /* Dark text color */
+}
+
+.app-container.light .react-flow__handle {
+    background: #AAA; /* Light handle color */
+}
+
+.app-container.light button {
+    background-color: #EAEAEA; /* Light button background */
+    color: #333; /* Dark button text */
+}
+
+.app-container.light button:hover {
+    background-color: #D0D0D0; /* Light button hover effect */
+}

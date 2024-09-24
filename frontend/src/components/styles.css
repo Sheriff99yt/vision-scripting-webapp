@@ -1,0 +1,58 @@
+:root {
+    /* Dark Mode */
+    --background-color-dark: #121212;
+    --surface-color-dark: #1E1E1E;
+    --text-color-dark: #E0E0E0;
+    --primary-color-dark: #BB86FC;
+    --secondary-color-dark: #03DAC6;
+
+    /* Light Mode */
+    --background-color-light: #FFFFFF;
+    --surface-color-light: #F5F5F5;
+    --text-color-light: #000000;
+    --primary-color-light: #6200EE;
+    --secondary-color-light: #03DAC6;
+}
+
+body {
+    background-color: var(--background-color-dark);
+    color: var(--text-color-dark);
+    font-family: Arial, sans-serif;
+}
+
+.custom-node {
+    background-color: var(--surface-color-dark);
+    border: 1px solid var(--primary-color-dark);
+}
+
+button {
+    background-color: var(--secondary-color-dark);
+    color: var(--text-color-dark);
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: var(--primary-color-dark);
+}
+
+/* Light Mode Styles */
+.light {
+    background-color: var(--background-color-light);
+    color: var(--text-color-light);
+}
+
+.light .custom-node {
+    background-color: var(--surface-color-light);
+    border: 1px solid var(--primary-color-light);
+}
+
+.light button {
+    background-color: var(--secondary-color-light);
+    color: var(--text-color-light);
+}
+
+.light button:hover {
+    background-color: var(--primary-color-light);
+}
