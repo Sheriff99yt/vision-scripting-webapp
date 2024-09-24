@@ -20,10 +20,6 @@ body {
     font-family: Arial, sans-serif;
 }
 
-.custom-node {
-    background-color: var(--surface-color-dark);
-    border: 1px solid var(--primary-color-dark);
-}
 
 button {
     background-color: var(--secondary-color-dark);
@@ -43,10 +39,6 @@ button:hover {
     color: var(--text-color-light);
 }
 
-.light .custom-node {
-    background-color: var(--surface-color-light);
-    border: 1px solid var(--primary-color-light);
-}
 
 .light button {
     background-color: var(--secondary-color-light);

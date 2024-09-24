@@ -2,46 +2,66 @@ import React, { useState, useRef } from 'react';
 import ReactFlow, { useNodesState, useEdgesState, MiniMap, Controls, Handle, addEdge } from 'react-flow-renderer';
 import './VisualScripting.css'; // Create a CSS file for custom styles
 
-const initialNodes = [
-    {
-        id: '1',
-        data: { label: 'Input Node' },
-        position: { x: 250, y: 5 },
-        type: 'input',
-    },
-];
-
 // Custom Node Components
 const InputNode = ({ data }) => (
     <div className="custom-node input-node">
-        <Handle type="target" position="top" />
+        <Handle type="target" position="right" />
         <div>{data.label}</div>
-        <Handle type="source" position="bottom" />
+        <Handle type="source" position="left" />
     </div>
 );
 
 const ProcessNode = ({ data }) => (
     <div className="custom-node process-node">
-        <Handle type="target" position="top" />
+        <Handle type="target" position="right" />
         <div>{data.label}</div>
-        <Handle type="source" position="bottom" />
+        <Handle type="source" position="left" />
     </div>
 );
 
 const OutputNode = ({ data }) => (
     <div className="custom-node output-node">
-        <Handle type="target" position="top" />
+        <Handle type="target" position="right" />
         <div>{data.label}</div>
-        <Handle type="source" position="bottom" />
+        <Handle type="source" position="left" />
     </div>
 );
+
+// Define node types outside the component to avoid redefinition
+const nodeTypes = {
+    input: InputNode,
+    process: ProcessNode,
+    output: OutputNode,
+};
+
+// Define initial nodes
+const initialNodes = [
+    {
+        id: '1',
+        type: 'input', // Specify type to use defined custom node
+        data: { label: 'Input Node' },
+        position: { x: 100, y: 100 },
+    },
+    {
+        id: '2',
+        type: 'process', // Specify type to use defined custom node
+        data: { label: 'Process Node' },
+        position: { x: 250, y: 100 },
+    },
+    {
+        id: '3',
+        type: 'output', // Specify type to use defined custom node
+        data: { label: 'Output Node' },
+        position: { x: 400, y: 100 },
+    },
+];
 
 const VisualScripting = () => {
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-    const [isDarkMode, setIsDarkMode] = useState(false); // State for toggle button
-    const [searchQuery, setSearchQuery] = useState(''); // State for search query
-    const fileInputRef = useRef(null); // Ref for the file input
+    const [isDarkMode, setIsDarkMode] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const fileInputRef = useRef(null);
 
     const addNode = (nodeType) => {
         const newNode = {
@@ -67,7 +87,6 @@ const VisualScripting = () => {
         };
         const blob = new Blob([JSON.stringify(flowData)], { type: 'application/json' });
 
-        // Use File System Access API to prompt user for a save location
         try {
             const handle = await window.showSaveFilePicker({
                 suggestedName: 'visualScriptingFlow.json',
@@ -106,7 +125,6 @@ const VisualScripting = () => {
                 }
             };
 
-            // Suppress console warnings during file reading
             const originalWarn = console.warn; // Store the original console.warn
             console.warn = () => {}; // Override console.warn to suppress warnings
 
@@ -121,22 +139,19 @@ const VisualScripting = () => {
         }
     };
 
-    // Function to trigger file input click
     const triggerFileInput = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click();
         }
     };
 
-    // Array of node types to display
-    const nodeTypes = [
+    const nodeTypeArray = [
         { type: 'input', label: 'Input Node' },
         { type: 'process', label: 'Process Node' },
         { type: 'output', label: 'Output Node' },
     ];
 
-    // Filtered node buttons based on the search query
-    const filteredNodeTypes = nodeTypes.filter((node) =>
+    const filteredNodeTypes = nodeTypeArray.filter((node) =>
         node.label.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -149,7 +164,7 @@ const VisualScripting = () => {
                     placeholder="Search nodes..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{ marginBottom: '10px', width: '100%' }} // Styling for the search input
+                    style={{ marginBottom: '10px', width: '100%' }}
                 />
                 {filteredNodeTypes.map((node) => (
                     <button key={node.type} onClick={() => addNode(node.type)}>
@@ -164,8 +179,8 @@ const VisualScripting = () => {
                     type="file"
                     accept=".json"
                     onChange={loadFromFile}
-                    style={{ display: 'none' }} // Hide the file input
-                    ref={fileInputRef} // Assign ref to the file input
+                    style={{ display: 'none' }}
+                    ref={fileInputRef}
                 />
                 <button onClick={triggerFileInput}>Load from File</button>
             </aside>
@@ -177,7 +192,7 @@ const VisualScripting = () => {
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
                     fitView
-                    nodeTypes={{ input: InputNode, process: ProcessNode, output: OutputNode }} // Directly define nodeTypes here
+                    nodeTypes={nodeTypes}
                     nodesDraggable={true}
                 >
                     <MiniMap />
