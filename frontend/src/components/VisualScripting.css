@@ -32,14 +32,17 @@
 .custom-node {
     background: #2C2C2C; /* Dark grey for the node */
     color: #EAEAEA; /* Light text color */
-    padding: 10px;
+    padding: 8px 16px; /* Updated padding: 8px top and bottom, 16px left and right */
     border-radius: 8px; /* Rounded corners */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Soft shadow */
     text-align: center; /* Center text in node */
-    width: 150px; /* Fixed width for nodes */
+}/* Specific node types */
+
+.selected {
+    border: 2px solid yellow; /* Yellow outline for selected nodes */
 }
 
-/* Specific node types */
+
 .input-node,
 .output-node,
 .process-node {
