@@ -1,61 +1,22 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import ReactFlow, { useNodesState, useEdgesState, MiniMap, Controls, Handle, addEdge } from 'react-flow-renderer';
+import ReactFlow, { useNodesState, useEdgesState, MiniMap, Controls, addEdge } from 'react-flow-renderer';
 import './VisualScripting.css'; // Create a CSS file for custom styles
 import { v4 as uuidv4 } from 'uuid'; // Import UUID for unique ID generation
-
-// Custom node component for input type
-const InputNode = ({ data }) => (
-    <div className={`custom-node input-node ${data.selected ? 'selected' : ''}`}>
-        <Handle type="target" position="right" />
-        <div>{data.label}</div>
-        <Handle type="source" position="left" />
-    </div>
-);
-
-// Custom node component for process type
-const ProcessNode = ({ data }) => (
-    <div className={`custom-node process-node ${data.selected ? 'selected' : ''}`}>
-        <Handle type="target" position="right" />
-        <div>{data.label}</div>
-        <Handle type="source" position="left" />
-    </div>
-);
-
-// Custom node component for output type
-const OutputNode = ({ data }) => (
-    <div className={`custom-node output-node ${data.selected ? 'selected' : ''}`}>
-        <Handle type="target" position="right" />
-        <div>{data.label}</div>
-        <Handle type="source" position="left" />
-    </div>
-);
+import { ProcessNode, ForLoopNode } from './NodeTypes'; // Import ProcessNode and ForLoopNode from NodeTypes.js
 
 // Define node types outside the component to avoid redefinition
 const nodeTypes = {
-    input: InputNode,
     process: ProcessNode,
-    output: OutputNode,
+    forLoop: ForLoopNode, // Add the ForLoopNode type
 };
 
-// Define initial nodes for the flow chart
+// Define initial nodes for the flow chart (only process)
 const initialNodes = [
     {
         id: uuidv4(),
-        type: 'input',
-        data: { label: 'Input Node' },
-        position: { x: 100, y: 100 },
-    },
-    {
-        id: uuidv4(),
         type: 'process',
-        data: { label: 'Process Node' },
+        data: { label: 'Process' },
         position: { x: 250, y: 100 },
-    },
-    {
-        id: uuidv4(),
-        type: 'output',
-        data: { label: 'Output Node' },
-        position: { x: 400, y: 100 },
     },
 ];
 
@@ -188,17 +149,17 @@ const VisualScripting = () => {
         };
     }, [handleKeyDown]); // Depend on handleKeyDown
 
-    // Function to add a new node of specified type
-    const addNode = (nodeType) => {
-        const newNode = {
-            id: uuidv4(),
-            data: { label: `Node ${nodes.length + 1}` },
-            position: { x: Math.random() * 400, y: Math.random() * 400 },
-            type: nodeType,
-        };
-
-        setNodes((nds) => nds.concat(newNode));
+// Function to add a new node of specified type without additional labels
+const addNode = (nodeType) => {
+    const newNode = {
+        id: uuidv4(),
+        data: { label: nodeType === 'process' ? 'Process' : 'For Loop' }, // Only name based on type
+        position: { x: Math.random() * 400, y: Math.random() * 400 },
+        type: nodeType,
     };
+
+    setNodes((nds) => nds.concat(newNode));
+};
 
     // Function to handle connecting nodes
     const onConnect = (params) => setEdges((eds) => addEdge(params, eds));
@@ -272,11 +233,10 @@ const VisualScripting = () => {
         }
     };
 
-    // Array of available node types for selection
+    // Array of available node types for selection (includes the new For Loop node)
     const nodeTypeArray = [
-        { type: 'input', label: 'Input Node' },
-        { type: 'process', label: 'Process Node' },
-        { type: 'output', label: 'Output Node' },
+        { type: 'process', label: 'Process' },
+        { type: 'forLoop', label: 'For Loop' }, // Add For Loop to node type selection
     ];
 
     // Filter node types based on search query
@@ -348,4 +308,3 @@ const VisualScripting = () => {
 
 // Export the VisualScripting component as the default export
 export default VisualScripting;
-
