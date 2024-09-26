@@ -4,102 +4,91 @@
 .app-container {
     display: flex;
     height: 100vh;
-    transition: background-color 0.3s ease; /* Smooth transition for background color */
+    transition: background-color 0.3s ease;
 }
 
 .app-container.dark {
-    background-color: #1A1A1A; /* Dark background for the app */
-    color: #EAEAEA; /* Light text color for contrast */
+    background-color: #1A1A1A;
+    color: #EAEAEA;
 }
 
 .app-container.light {
-    background-color: #F0F0F0; /* Light background for the app */
-    color: #333; /* Dark text color for contrast */
+    background-color: #F0F0F0;
+    color: #333;
 }
 
 .sidebar {
     width: 250px;
     padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    overflow-y: auto; /* Allow sidebar to scroll if content exceeds */
 }
 
 .main-canvas {
     flex-grow: 1;
     position: relative;
+    overflow: hidden; /* Prevent internal scrolling */
 }
 
-/* Custom Node Styles */
 .custom-node {
-    background: #2C2C2C; /* Dark grey for the node */
-    color: #EAEAEA; /* Light text color */
-    padding: 8px 16px; /* Updated padding: 8px top and bottom, 16px left and right */
-    border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Soft shadow */
-    text-align: center; /* Center text in node */
-}/* Specific node types */
+    background: #2C2C2C;
+    color: #EAEAEA;
+    padding: 8px 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
 
 .selected {
-    border: 2px solid yellow; /* Yellow outline for selected nodes */
+    border: 2px solid yellow;
 }
 
-
-.input-node,
-.output-node,
-.process-node {
-    border: none; /* No border */
-}
-
-/* Handle Styles */
 .react-flow__handle {
-    background: #555; /* Darker handle color */
+    background: #555;
     border-radius: 50%;
     width: 10px;
     height: 10px;
 }
 
-/* Button Styles */
 button {
-    background-color: #3C3C3C; /* Button background */
-    color: #EAEAEA; /* Button text color */
+    background-color: #3C3C3C;
+    color: #EAEAEA;
     border: none;
     border-radius: 5px;
     padding: 10px 15px;
     cursor: pointer;
-    transition: background-color 0.3s ease; /* Smooth background transition */
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
-    background-color: #4A4A4A; /* Button hover effect */
+    background-color: #4A4A4A;
 }
 
-/* MiniMap and Controls Style Adjustments */
 .react-flow__controls {
-    background-color: rgba(255, 255, 255, 0.1); /* Translucent control background */
+    background-color: rgba(255, 255, 255, 0.1);
     border-radius: 5px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); /* Soft shadow for controls */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* Adjustments for the MiniMap */
 .react-flow__minimap {
-    background-color: #1A1A1A; /* Dark background for MiniMap */
-    border: 1px solid #333; /* Border color for MiniMap */
+    background-color: #1A1A1A;
+    border: 1px solid #333;
 }
 
-/* Light Mode Specific Styles */
 .app-container.light .custom-node {
-    background: #FFFFFF; /* Light background for nodes */
-    color: #333; /* Dark text color */
+    background: #FFFFFF;
+    color: #333;
 }
 
 .app-container.light .react-flow__handle {
-    background: #AAA; /* Light handle color */
+    background: #AAA;
 }
 
 .app-container.light button {
-    background-color: #EAEAEA; /* Light button background */
-    color: #333; /* Dark button text */
+    background-color: #EAEAEA;
+    color: #333;
 }
 
 .app-container.light button:hover {
-    background-color: #D0D0D0; /* Light button hover effect */
+    background-color: #D0D0D0;
 }

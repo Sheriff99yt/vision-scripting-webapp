@@ -5,7 +5,7 @@ import { Handle } from 'react-flow-renderer';
 export const ProcessNode = ({ data }) => (
     <div className={`custom-node process-node ${data.selected ? 'selected' : ''}`}>
         <Handle type="target" position="right" />
-        <div>{data.label}</div> {/* This will show "Process" */}
+        <div>{data.label || 'Process'}</div> {/* Show type name; default is 'Process' */}
         <Handle type="source" position="left" />
     </div>
 );
@@ -13,10 +13,13 @@ export const ProcessNode = ({ data }) => (
 // Custom node component for For Loop
 export const ForLoopNode = ({ data }) => (
     <div className={`custom-node for-loop-node ${data.selected ? 'selected' : ''}`}>
-        <Handle type="target" position="left" style={{ top: '10%' }} />
-        <Handle type="target" position="left" style={{ top: '50%' }} />
-        <Handle type="target" position="left" style={{ top: '90%' }} />
-        <div>{data.label}</div> {/* This will show "For Loop" */}
-        <Handle type="source" position="right" />
+        <Handle type="target" position="right" />
+        <div>{data.label || 'For Loop'}</div> {/* Show type name; default is 'For Loop' */}
+        <Handle type="source" position="left" style={{ top: '10%' }} />
+        <Handle type="source" position="left" style={{ top: '50%' }} />
+        <Handle type="source" position="left" style={{ top: '90%' }} />
+
     </div>
 );
+
+// You can add more node components here in the future
