@@ -1,6 +1,6 @@
-// src/Notification.js
+// Notification.js
 import React, { useEffect } from "react";
-import "./Notification.css"; // Ensure this path is correct
+import "./Notification.css"; // You can style your notification component here
 
 const Notification = ({ message, onDismiss }) => {
   useEffect(() => {
@@ -11,12 +11,7 @@ const Notification = ({ message, onDismiss }) => {
     return () => clearTimeout(timer);
   }, [onDismiss]);
 
-  return (
-    <div className="notification">
-      {message}
-      <button onClick={onDismiss}>Dismiss</button>
-    </div>
-  );
+  return <div className="notification">{message}</div>;
 };
 
 export default Notification;
