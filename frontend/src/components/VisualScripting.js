@@ -1,3 +1,4 @@
+// VisualScripting.js
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import ReactFlow, {
   useNodesState,
@@ -9,6 +10,9 @@ import ReactFlow, {
 import "./VisualScripting.css";
 import { v4 as uuidv4 } from "uuid";
 import { ProcessNode, ForLoopNode } from "./NodeTypes";
+import Toolbar from "./Toolbar";
+import Sidebar from "./Sidebar";
+import { useUserSettings } from "./userSettings"; // Import the user settings hook
 
 // Define initial nodes for the flow chart
 const initialNodes = [
@@ -188,71 +192,19 @@ const VisualScripting = () => {
     manageHistory(updatedNodes, edges);
   }, [nodes, edges]);
 
-  // Handle keyboard shortcuts for various actions
-  const handleKeyDown = useCallback(
-    (event) => {
-      switch (event.key) {
-        case "c":
-          if (event.ctrlKey) {
-            copyNode();
-            event.preventDefault();
-          }
-          break;
-        case "x":
-          if (event.ctrlKey) {
-            cutNode();
-            event.preventDefault();
-          }
-          break;
-        case "v":
-          if (event.ctrlKey) {
-            pasteNode();
-            event.preventDefault();
-          }
-          break;
-        case "Delete":
-          deleteSelected();
-          event.preventDefault();
-          break;
-        case "a":
-          if (event.ctrlKey) {
-            selectAllNodes();
-            event.preventDefault();
-          }
-          break;
-        case "d":
-          if (event.ctrlKey) {
-            deselectAllNodes();
-            event.preventDefault();
-          }
-          break;
-        case "z":
-          if (event.ctrlKey) {
-            undo();
-            event.preventDefault();
-          }
-          break;
-        case "y":
-          if (event.ctrlKey) {
-            redo();
-            event.preventDefault();
-          }
-          break;
-        default:
-          break;
-      }
-    },
-    [
-      copyNode,
-      cutNode,
-      deleteSelected,
-      pasteNode,
-      selectAllNodes,
-      deselectAllNodes,
-      undo,
-      redo,
-    ]
-  );
+  // Use user settings logic
+  const { handleKeyDown } = useUserSettings({
+    copyNode,
+    cutNode,
+    pasteNode,
+    deleteSelected,
+    selectAllNodes,
+    deselectAllNodes,
+    undo,
+    redo,
+    nodes,
+    edges,
+  });
 
   // Set up event listeners for mouse movement
   useEffect(() => {
@@ -328,13 +280,6 @@ const VisualScripting = () => {
     }
   };
 
-  // Trigger file input dialog for loading a file
-  const triggerFileInput = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
   // Filter node types based on search query
   const filteredNodeTypes = [
     { type: "process", label: "Process" },
@@ -346,79 +291,32 @@ const VisualScripting = () => {
   // Render the main application component
   return (
     <div className={`app-container ${isDarkMode ? "dark" : "light"}`}>
-      <aside className="sidebar">
-        <h2>Toolbox</h2>
-        <input
-          type="text"
-          placeholder="Search nodes..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ marginBottom: "10px", width: "100%" }}
-        />
-        {filteredNodeTypes.length ? (
-          // Render buttons for each filtered node type
-          filteredNodeTypes.map((node) => (
-            <button
-              key={node.type}
-              draggable
-              onDragStart={(event) => {
-                event.dataTransfer.setData("application/reactflow", node.type);
-              }}
-            >
-              {node.label}
-            </button>
-          ))
-        ) : (
-          <p>No nodes found.</p>
-        )}
-      </aside>
+      <Sidebar
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        filteredNodeTypes={filteredNodeTypes}
+        handleDrop={handleDrop}
+        handleDragOver={handleDragOver}
+      />
       <main
         className="main-canvas"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
-        <div className="toolbar">
-          <button onClick={toggleDarkMode} style={{ margin: "8px" }}>
-            Toggle to {isDarkMode ? "Light" : "Dark"} Mode
-          </button>
-          <button onClick={saveToFile} style={{ margin: "8px" }}>
-            Save to File
-          </button>
-          <input
-            type="file"
-            accept=".json"
-            onChange={loadFromFile}
-            style={{ display: "none" }}
-            ref={fileInputRef}
-          />
-          <button onClick={triggerFileInput} style={{ margin: "8px" }}>
-            Load from File
-          </button>
-          <button onClick={copyNode} style={{ margin: "8px" }}>
-            Copy
-          </button>
-          <button onClick={cutNode} style={{ margin: "8px" }}>
-            Cut
-          </button>
-          <button onClick={pasteNode} style={{ margin: "8px" }}>
-            Paste
-          </button>
-          <button onClick={deleteSelected} style={{ margin: "8px" }}>
-            Delete
-          </button>
-          <button onClick={selectAllNodes} style={{ margin: "8px" }}>
-            Select All
-          </button>
-          <button onClick={deselectAllNodes} style={{ margin: "8px" }}>
-            Deselect All
-          </button>
-          <button onClick={undo} style={{ margin: "8px" }}>
-            Undo
-          </button>
-          <button onClick={redo} style={{ margin: "8px" }}>
-            Redo
-          </button>
-        </div>
+        <Toolbar
+          toggleDarkMode={toggleDarkMode}
+          saveToFile={saveToFile}
+          loadFromFile={loadFromFile}
+          copyNode={copyNode}
+          cutNode={cutNode}
+          pasteNode={pasteNode}
+          deleteSelected={deleteSelected}
+          selectAllNodes={selectAllNodes}
+          deselectAllNodes={deselectAllNodes}
+          undo={undo}
+          redo={redo}
+          fileInputRef={fileInputRef}
+        />
 
         <ReactFlow
           nodes={nodes}
