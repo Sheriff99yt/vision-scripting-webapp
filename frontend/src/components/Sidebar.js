@@ -1,39 +1,42 @@
-// Sidebar.js
-import React, { useState, useCallback } from "react";
+import React from "react";
 
 const Sidebar = ({
   searchQuery,
   setSearchQuery,
   filteredNodeTypes,
-  handleDrop,
-  handleDragOver,
+  createNode,
 }) => {
+  const handleDragStart = (event, type) => {
+    event.dataTransfer.setData(
+      "application/reactflow",
+      JSON.stringify({ type })
+    );
+  };
+
+  const handleClick = (type) => {
+    createNode(type, { x: 100, y: 100 }); // Spawn node at default position
+  };
+
   return (
     <aside className="sidebar">
-      <h2>Toolbox</h2>
       <input
         type="text"
-        placeholder="Search nodes..."
+        placeholder="Search..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        style={{ marginBottom: "10px", width: "100%" }}
       />
-      {filteredNodeTypes.length ? (
-        // Render buttons for each filtered node type
-        filteredNodeTypes.map((node) => (
+      <div className="node-types">
+        {filteredNodeTypes.map((node) => (
           <button
             key={node.type}
             draggable
-            onDragStart={(event) => {
-              event.dataTransfer.setData("application/reactflow", node.type);
-            }}
+            onDragStart={(event) => handleDragStart(event, node.type)}
+            onClick={() => handleClick(node.type)} // Handle click to spawn node
           >
             {node.label}
           </button>
-        ))
-      ) : (
-        <p>No nodes found.</p>
-      )}
+        ))}
+      </div>
     </aside>
   );
 };

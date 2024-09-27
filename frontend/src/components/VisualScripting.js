@@ -73,7 +73,7 @@ const VisualScripting = () => {
     setFutureHistory,
     copiedNodes,
     setCopiedNodes,
-    mousePosition, // Pass mousePosition to userSettings
+    mousePosition,
   });
 
   useEffect(() => {
@@ -144,6 +144,35 @@ const VisualScripting = () => {
     }
   };
 
+  const createNode = useCallback(
+    (type, position) => {
+      const newNode = {
+        id: uuidv4(),
+        type,
+        data: { label: type === "process" ? "Process" : "For Loop" },
+        position,
+      };
+      manageHistory([...nodes, newNode], edges);
+    },
+    [nodes, edges, manageHistory]
+  );
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+
+    const data = JSON.parse(
+      event.dataTransfer.getData("application/reactflow")
+    );
+    if (data) {
+      const { type } = data;
+      createNode(type, { x: event.clientX, y: event.clientY });
+    }
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+  };
+
   const filteredNodeTypes = [
     { type: "process", label: "Process" },
     { type: "forLoop", label: "For Loop" },
@@ -157,17 +186,12 @@ const VisualScripting = () => {
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         filteredNodeTypes={filteredNodeTypes}
-        handleDrop={(event) => {
-          /* handle drop logic */
-        }}
-        handleDragOver={(event) => event.preventDefault()}
+        createNode={createNode}
       />
       <main
         className="main-canvas"
-        onDrop={(event) => {
-          /* handle drop logic */
-        }}
-        onDragOver={(event) => event.preventDefault()}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
       >
         <Toolbar
           toggleDarkMode={toggleDarkMode}
@@ -175,15 +199,15 @@ const VisualScripting = () => {
           loadFromFile={loadFromFile}
           copyNode={() => {
             const nodesCopied = copyNode();
-            setCopiedNodes(nodesCopied); // Update copiedNodes state
+            setCopiedNodes(nodesCopied);
           }}
           cutNode={() => {
             const nodesCut = cutNode();
             if (nodesCut) {
-              setCopiedNodes(nodesCut); // Update copiedNodes state
+              setCopiedNodes(nodesCut);
             }
           }}
-          pasteNode={() => pasteNode(copiedNodes)} // Handle paste with copiedNodes and mousePosition in useUserSettings
+          pasteNode={() => pasteNode(copiedNodes)}
           deleteSelected={deleteSelected}
           selectAllNodes={selectAllNodes}
           deselectAllNodes={deselectAllNodes}
@@ -198,10 +222,6 @@ const VisualScripting = () => {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
-          onLoad={(instance) => {
-            const { x, y, zoom } = instance.getViewport();
-            setViewport({ x, y, zoom });
-          }}
           fitView
           nodeTypes={nodeTypes}
           nodesDraggable
