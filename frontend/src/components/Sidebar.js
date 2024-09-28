@@ -31,7 +31,7 @@ const Sidebar = ({
             key={node.type}
             draggable
             onDragStart={(event) => handleDragStart(event, node.type)}
-            onClick={() => handleClick(node.type)} // Handle click to spawn node
+            onClick={() => handleClick(node.type)}
           >
             {node.label}
           </button>

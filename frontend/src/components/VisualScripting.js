@@ -1,26 +1,18 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import ReactFlow, {
-  useNodesState,
-  useEdgesState,
   MiniMap,
   Controls,
+  Background,
+  useNodesState,
+  useEdgesState,
   addEdge,
 } from "react-flow-renderer";
-import "./VisualScripting.css";
 import { v4 as uuidv4 } from "uuid";
-import { ProcessNode, ForLoopNode } from "./NodeTypes";
-import Toolbar from "./Toolbar";
 import Sidebar from "./Sidebar";
+import Toolbar from "./Toolbar";
+import { ProcessNode, ForLoopNode } from "./NodeTypes";
 import { useUserSettings } from "./userSettings";
-
-const initialNodes = [
-  {
-    id: uuidv4(),
-    type: "process",
-    data: { label: "Process" },
-    position: { x: 250, y: 100 },
-  },
-];
+import "./VisualScripting.css";
 
 const nodeTypes = {
   process: ProcessNode,
@@ -28,28 +20,35 @@ const nodeTypes = {
 };
 
 const VisualScripting = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [history, setHistory] = useState([]);
-  const [futureHistory, setFutureHistory] = useState([]);
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const fileInputRef = useRef(null);
+  const [history, setHistory] = useState([{ nodes: [], edges: [] }]);
+  const [futureHistory, setFutureHistory] = useState([]);
   const [copiedNodes, setCopiedNodes] = useState([]);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [viewport, setViewport] = useState({ x: 0, y: 0, zoom: 1 });
+  const fileInputRef = useRef(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredNodeTypes, setFilteredNodeTypes] = useState([
+    { type: "process", label: "Process" },
+    { type: "forLoop", label: "For Loop" },
+  ]);
 
-  const handleMouseMove = (event) => {
-    setMousePosition({ x: event.clientX, y: event.clientY });
-  };
+  const onConnect = useCallback(
+    (params) => setEdges((eds) => addEdge(params, eds)),
+    [setEdges]
+  );
 
-  const manageHistory = (newNodes, newEdges) => {
-    const currentState = { nodes, edges };
-    setHistory((prev) => [...prev, currentState]);
-    setFutureHistory([]);
-    setNodes(newNodes);
-    setEdges(newEdges);
-  };
+  const manageHistory = useCallback(
+    (newNodes, newEdges) => {
+      setNodes(newNodes);
+      setEdges(newEdges);
+      setHistory([...history, { nodes: newNodes, edges: newEdges }]);
+      setFutureHistory([]);
+    },
+    [history, setNodes, setEdges]
+  );
 
   const {
     handleKeyDown,
@@ -74,46 +73,23 @@ const VisualScripting = () => {
     copiedNodes,
     setCopiedNodes,
     mousePosition,
+    viewport,
   });
 
-  useEffect(() => {
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+  };
 
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
-
-  const onConnect = (params) => setEdges((eds) => addEdge(params, eds));
-
-  const toggleDarkMode = () => setIsDarkMode((prev) => !prev);
-
-  const saveToFile = async () => {
-    const flowData = { nodes, edges };
-    const blob = new Blob([JSON.stringify(flowData)], {
-      type: "application/json",
-    });
-
-    try {
-      const handle = await window.showSaveFilePicker({
-        suggestedName: "visualScriptingFlow.json",
-        types: [
-          {
-            description: "JSON Files",
-            accept: { "application/json": [".json"] },
-          },
-        ],
-      });
-      const writableStream = await handle.createWritable();
-      await writableStream.write(blob);
-      await writableStream.close();
-      alert("Flow saved to file!");
-    } catch (error) {
-      console.error("Error saving file:", error);
-      alert("Failed to save file.");
-    }
+  const saveToFile = () => {
+    const data = JSON.stringify({ nodes, edges });
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "flow.json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const loadFromFile = (event) => {
@@ -171,51 +147,41 @@ const VisualScripting = () => {
 
   const handleDragOver = (event) => {
     event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
   };
 
-  const filteredNodeTypes = [
-    { type: "process", label: "Process" },
-    { type: "forLoop", label: "For Loop" },
-  ].filter((node) =>
-    node.label.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleMouseMove = (event) => {
+    setMousePosition({ x: event.clientX, y: event.clientY });
+  };
 
   return (
-    <div className={`app-container ${isDarkMode ? "dark" : "light"}`}>
+    <div
+      className={`app-container ${isDarkMode ? "dark" : "light"}`}
+      onKeyDown={handleKeyDown}
+      tabIndex="0"
+      onMouseMove={handleMouseMove}
+    >
       <Sidebar
+        createNode={createNode}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         filteredNodeTypes={filteredNodeTypes}
-        createNode={createNode}
       />
-      <main
-        className="main-canvas"
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-      >
+      <div className="main-canvas" onDrop={handleDrop} onDragOver={handleDragOver}>
         <Toolbar
           toggleDarkMode={toggleDarkMode}
           saveToFile={saveToFile}
           loadFromFile={loadFromFile}
-          copyNode={() => {
-            const nodesCopied = copyNode();
-            setCopiedNodes(nodesCopied);
-          }}
-          cutNode={() => {
-            const nodesCut = cutNode();
-            if (nodesCut) {
-              setCopiedNodes(nodesCut);
-            }
-          }}
-          pasteNode={() => pasteNode(copiedNodes)}
+          fileInputRef={fileInputRef}
+          copyNode={copyNode}
+          cutNode={cutNode}
+          pasteNode={pasteNode}
           deleteSelected={deleteSelected}
           selectAllNodes={selectAllNodes}
           deselectAllNodes={deselectAllNodes}
           undo={undo}
           redo={redo}
-          fileInputRef={fileInputRef}
         />
-
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -225,11 +191,13 @@ const VisualScripting = () => {
           fitView
           nodeTypes={nodeTypes}
           nodesDraggable
+          onMove={(event, viewport) => setViewport(viewport)}
         >
           <MiniMap />
           <Controls />
+          <Background />
         </ReactFlow>
-      </main>
+      </div>
     </div>
   );
 };

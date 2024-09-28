@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { copy, paste } from "../utils/clipboard";
 
 export const useUserSettings = ({
   nodes,
@@ -13,113 +14,164 @@ export const useUserSettings = ({
   setFutureHistory,
   copiedNodes,
   setCopiedNodes,
-  mousePosition, // Add mousePosition to parameters
+  mousePosition,
+  viewport,
 }) => {
-  const copyNode = useCallback(() => {
+  const copyNode = useCallback(async () => {
     const selectedNodes = nodes.filter((node) => node.selected);
-    return selectedNodes; // Return the copied nodes
-  }, [nodes]);
+    const selectedEdges = edges.filter((edge) => 
+      selectedNodes.some(node => node.id === edge.source || node.id === edge.target)
+    );
+    const success = await copy(selectedNodes, selectedEdges);
+    if (success) {
+      setCopiedNodes(selectedNodes);
+    }
+    return selectedNodes;
+  }, [nodes, edges, setCopiedNodes]);
 
-  const cutNode = useCallback(() => {
+  const cutNode = useCallback(async () => {
     const selectedNodes = nodes.filter((node) => node.selected);
-    if (selectedNodes.length) {
+    const selectedEdges = edges.filter((edge) => 
+      selectedNodes.some(node => node.id === edge.source || node.id === edge.target)
+    );
+    const success = await copy(selectedNodes, selectedEdges);
+    if (success) {
       manageHistory(
         nodes.filter((node) => !node.selected),
-        edges
+        edges.filter((edge) => !selectedNodes.some(node => node.id === edge.source || node.id === edge.target))
       );
-      return selectedNodes; // Return the cut nodes which are copied
+      return selectedNodes;
     }
   }, [nodes, edges, manageHistory]);
 
-  const pasteNode = useCallback(
-    (copiedNodes) => {
-      if (!Array.isArray(copiedNodes) || copiedNodes.length === 0) return; // Ensure copiedNodes is an array and has items
-      const newNodes = copiedNodes.map((node) => ({
-        ...node,
-        id: uuidv4(), // Generate new unique IDs
-        position: {
-          x: Math.max(0, mousePosition.x + 20), // Pasting position (adjusted with mouse position)
-          y: Math.max(0, mousePosition.y + 20),
-        },
-        selected: true,
-      }));
-      manageHistory([...nodes, ...newNodes], edges);
-    },
-    [nodes, edges, manageHistory, mousePosition] // Include mousePosition in dependencies
-  );
+  const pasteNode = useCallback(async () => {
+    const clipboardData = await paste();
+    if (!clipboardData) return;
+
+    const { nodes: pastedNodes, edges: pastedEdges, boundingBox } = clipboardData;
+
+    const offsetX = (mousePosition.x - viewport.x) / viewport.zoom - boundingBox.minX;
+    const offsetY = (mousePosition.y - viewport.y) / viewport.zoom - boundingBox.minY;
+
+    const newNodes = pastedNodes.map(node => ({
+      ...node,
+      id: uuidv4(),
+      position: {
+        x: node.position.x + offsetX,
+        y: node.position.y + offsetY,
+      },
+      selected: true,
+    }));
+
+    const idMap = pastedNodes.reduce((map, node, index) => {
+      map[node.id] = newNodes[index].id;
+      return map;
+    }, {});
+
+    const newEdges = pastedEdges.map(edge => ({
+      ...edge,
+      id: uuidv4(),
+      source: idMap[edge.source],
+      target: idMap[edge.target],
+    }));
+
+    manageHistory([...nodes, ...newNodes], [...edges, ...newEdges]);
+  }, [nodes, edges, manageHistory, mousePosition, viewport]);
 
   const deleteSelected = useCallback(() => {
-    manageHistory(
-      nodes.filter((node) => !node.selected),
-      edges.filter((edge) => !edge.selected)
+    const selectedNodes = nodes.filter((node) => node.selected);
+    const updatedNodes = nodes.filter((node) => !node.selected);
+    const updatedEdges = edges.filter(
+      (edge) =>
+        !selectedNodes.some(
+          (node) => node.id === edge.source || node.id === edge.target
+        )
     );
+    manageHistory(updatedNodes, updatedEdges);
   }, [nodes, edges, manageHistory]);
 
   const selectAllNodes = useCallback(() => {
     const updatedNodes = nodes.map((node) => ({ ...node, selected: true }));
-    manageHistory(updatedNodes, edges);
-  }, [nodes, edges, manageHistory]);
+    setNodes(updatedNodes);
+  }, [nodes, setNodes]);
 
   const deselectAllNodes = useCallback(() => {
     const updatedNodes = nodes.map((node) => ({ ...node, selected: false }));
-    manageHistory(updatedNodes, edges);
-  }, [nodes, edges, manageHistory]);
+    setNodes(updatedNodes);
+  }, [nodes, setNodes]);
 
   const undo = useCallback(() => {
-    if (history.length === 0) return;
-    const lastState = history[history.length - 1];
-    setFutureHistory((prev) => [...prev, { nodes, edges }]);
-    setNodes(lastState.nodes);
-    setEdges(lastState.edges);
-    setHistory(history.slice(0, -1));
-  }, [history, setNodes, setEdges, setHistory, setFutureHistory]);
+    if (history.length > 1) {
+      const currentState = history[history.length - 1];
+      const previousState = history[history.length - 2];
+      setNodes(previousState.nodes);
+      setEdges(previousState.edges);
+      setHistory(history.slice(0, -1));
+      setFutureHistory([currentState, ...futureHistory]);
+    }
+  }, [history, futureHistory, setNodes, setEdges, setHistory, setFutureHistory]);
 
   const redo = useCallback(() => {
-    if (futureHistory.length === 0) return;
-    const nextState = futureHistory[futureHistory.length - 1];
-    setHistory((prev) => [...prev, { nodes, edges }]);
-    setNodes(nextState.nodes);
-    setEdges(nextState.edges);
-    setFutureHistory(futureHistory.slice(0, -1));
-  }, [futureHistory, setNodes, setEdges, setHistory, setFutureHistory]);
-
-  const keyActions = {
-    c: () => {
-      const copiedNodes = copyNode(); // Trigger copyNode
-      if (copiedNodes.length > 0) {
-        setCopiedNodes(copiedNodes); // Store the copied nodes
-      }
-      return copiedNodes;
-    },
-    x: () => {
-      const cutNodes = cutNode(); // Trigger cutNode
-      if (cutNodes) {
-        setCopiedNodes(cutNodes); // Store cut nodes as copied
-      }
-      return cutNodes;
-    },
-    v: (event) => {
-      if (copiedNodes.length > 0) {
-        pasteNode(copiedNodes); // Use stored copied nodes for pasting
-        event.preventDefault();
-      }
-    },
-    Delete: deleteSelected,
-    a: selectAllNodes,
-    d: deselectAllNodes,
-    z: undo,
-    y: redo,
-  };
+    if (futureHistory.length > 0) {
+      const [nextState, ...remainingFuture] = futureHistory;
+      setNodes(nextState.nodes);
+      setEdges(nextState.edges);
+      setHistory([...history, nextState]);
+      setFutureHistory(remainingFuture);
+    }
+  }, [history, futureHistory, setNodes, setEdges, setHistory, setFutureHistory]);
 
   const handleKeyDown = useCallback(
     (event) => {
-      const action = keyActions[event.key];
-      if (action && event.ctrlKey) {
-        action(event); // Call the action if valid
-        event.preventDefault(); // Prevent default if a valid action is taken
+      if (event.ctrlKey || event.metaKey) {
+        switch (event.key.toLowerCase()) {
+          case "c":
+            event.preventDefault();
+            copyNode();
+            break;
+          case "x":
+            event.preventDefault();
+            cutNode();
+            break;
+          case "v":
+            event.preventDefault();
+            pasteNode();
+            break;
+          case "a":
+            event.preventDefault();
+            selectAllNodes();
+            break;
+          case "z":
+            event.preventDefault();
+            if (event.shiftKey) {
+              redo();
+            } else {
+              undo();
+            }
+            break;
+          case "y":
+            event.preventDefault();
+            redo();
+            break;
+          default:
+            break;
+        }
+      } else if (event.key === "Delete" || event.key === "Backspace") {
+        deleteSelected();
+      } else if (event.key === "Escape") {
+        deselectAllNodes();
       }
     },
-    [keyActions]
+    [
+      copyNode,
+      cutNode,
+      pasteNode,
+      deleteSelected,
+      selectAllNodes,
+      deselectAllNodes,
+      undo,
+      redo,
+    ]
   );
 
   return {
