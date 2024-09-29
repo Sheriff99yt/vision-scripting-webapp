@@ -16,6 +16,7 @@ export const useUserSettings = ({
   setCopiedNodes,
   mousePosition,
   viewport,
+  showNotification,
 }) => {
   const copyNode = useCallback(async () => {
     const selectedNodes = nodes.filter((node) => node.selected);
@@ -25,9 +26,12 @@ export const useUserSettings = ({
     const success = await copy(selectedNodes, selectedEdges);
     if (success) {
       setCopiedNodes(selectedNodes);
+      showNotification('Nodes copied');
+    } else {
+      showNotification('Failed to copy nodes');
     }
     return selectedNodes;
-  }, [nodes, edges, setCopiedNodes]);
+  }, [nodes, edges, setCopiedNodes, showNotification]);
 
   const cutNode = useCallback(async () => {
     const selectedNodes = nodes.filter((node) => node.selected);
@@ -40,13 +44,19 @@ export const useUserSettings = ({
         nodes.filter((node) => !node.selected),
         edges.filter((edge) => !selectedNodes.some(node => node.id === edge.source || node.id === edge.target))
       );
+      showNotification('Nodes cut');
       return selectedNodes;
+    } else {
+      showNotification('Failed to cut nodes');
     }
-  }, [nodes, edges, manageHistory]);
+  }, [nodes, edges, manageHistory, showNotification]);
 
   const pasteNode = useCallback(async () => {
     const clipboardData = await paste();
-    if (!clipboardData) return;
+    if (!clipboardData) {
+      showNotification('No valid data to paste');
+      return;
+    }
 
     const { nodes: pastedNodes, edges: pastedEdges, boundingBox } = clipboardData;
 
@@ -76,7 +86,8 @@ export const useUserSettings = ({
     }));
 
     manageHistory([...nodes, ...newNodes], [...edges, ...newEdges]);
-  }, [nodes, edges, manageHistory, mousePosition, viewport]);
+    showNotification('Nodes pasted');
+  }, [nodes, edges, manageHistory, mousePosition, viewport, showNotification]);
 
   const deleteSelected = useCallback(() => {
     const selectedNodes = nodes.filter((node) => node.selected);
@@ -88,17 +99,20 @@ export const useUserSettings = ({
         )
     );
     manageHistory(updatedNodes, updatedEdges);
-  }, [nodes, edges, manageHistory]);
+    showNotification('Selected nodes deleted');
+  }, [nodes, edges, manageHistory, showNotification]);
 
   const selectAllNodes = useCallback(() => {
     const updatedNodes = nodes.map((node) => ({ ...node, selected: true }));
     setNodes(updatedNodes);
-  }, [nodes, setNodes]);
+    showNotification('All nodes selected');
+  }, [nodes, setNodes, showNotification]);
 
   const deselectAllNodes = useCallback(() => {
     const updatedNodes = nodes.map((node) => ({ ...node, selected: false }));
     setNodes(updatedNodes);
-  }, [nodes, setNodes]);
+    showNotification('All nodes deselected');
+  }, [nodes, setNodes, showNotification]);
 
   const undo = useCallback(() => {
     if (history.length > 1) {
@@ -108,8 +122,11 @@ export const useUserSettings = ({
       setEdges(previousState.edges);
       setHistory(history.slice(0, -1));
       setFutureHistory([currentState, ...futureHistory]);
+      showNotification('Undo');
+    } else {
+      showNotification('Nothing to undo');
     }
-  }, [history, futureHistory, setNodes, setEdges, setHistory, setFutureHistory]);
+  }, [history, futureHistory, setNodes, setEdges, setHistory, setFutureHistory, showNotification]);
 
   const redo = useCallback(() => {
     if (futureHistory.length > 0) {
@@ -118,8 +135,11 @@ export const useUserSettings = ({
       setEdges(nextState.edges);
       setHistory([...history, nextState]);
       setFutureHistory(remainingFuture);
+      showNotification('Redo');
+    } else {
+      showNotification('Nothing to redo');
     }
-  }, [history, futureHistory, setNodes, setEdges, setHistory, setFutureHistory]);
+  }, [history, futureHistory, setNodes, setEdges, setHistory, setFutureHistory, showNotification]);
 
   const handleKeyDown = useCallback(
     (event) => {

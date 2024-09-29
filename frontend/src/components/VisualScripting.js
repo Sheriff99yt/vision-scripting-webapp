@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -12,6 +12,7 @@ import Sidebar from "./Sidebar";
 import Toolbar from "./Toolbar";
 import { ProcessNode, ForLoopNode } from "./NodeTypes";
 import { useUserSettings } from "./userSettings";
+import Notification from './Notification';
 import "./VisualScripting.css";
 
 const nodeTypes = {
@@ -30,10 +31,26 @@ const VisualScripting = () => {
   const [viewport, setViewport] = useState({ x: 0, y: 0, zoom: 1 });
   const fileInputRef = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredNodeTypes, setFilteredNodeTypes] = useState([
+  const [notification, setNotification] = useState(null);
+
+  const availableNodeTypes = [
     { type: "process", label: "Process" },
     { type: "forLoop", label: "For Loop" },
-  ]);
+  ];
+
+  const [filteredNodeTypes, setFilteredNodeTypes] = useState(availableNodeTypes);
+
+  useEffect(() => {
+    const filtered = availableNodeTypes.filter((node) =>
+      node.label.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredNodeTypes(filtered);
+  }, [searchQuery]);
+
+  const showNotification = (message) => {
+    setNotification(message);
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
@@ -74,10 +91,12 @@ const VisualScripting = () => {
     setCopiedNodes,
     mousePosition,
     viewport,
+    showNotification,
   });
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
+    showNotification(`${isDarkMode ? 'Light' : 'Dark'} mode activated`);
   };
 
   const saveToFile = () => {
@@ -90,6 +109,7 @@ const VisualScripting = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    showNotification('Flow saved to file');
   };
 
   const loadFromFile = (event) => {
@@ -104,13 +124,13 @@ const VisualScripting = () => {
             Array.isArray(loadedData.edges)
           ) {
             manageHistory(loadedData.nodes, loadedData.edges);
-            alert("Flow loaded from file!");
+            showNotification("Flow loaded from file!");
           } else {
-            alert("Invalid data format in the file.");
+            showNotification("Invalid data format in the file.");
           }
         } catch (error) {
           console.error("Failed to load data:", error);
-          alert("Failed to load data: Invalid JSON format.");
+          showNotification("Failed to load data: Invalid JSON format.");
         }
       };
 
@@ -129,6 +149,7 @@ const VisualScripting = () => {
         position,
       };
       manageHistory([...nodes, newNode], edges);
+      showNotification(`New ${type} node created`);
     },
     [nodes, edges, manageHistory]
   );
@@ -181,6 +202,7 @@ const VisualScripting = () => {
           deselectAllNodes={deselectAllNodes}
           undo={undo}
           redo={redo}
+          showNotification={showNotification}
         />
         <ReactFlow
           nodes={nodes}
@@ -198,6 +220,7 @@ const VisualScripting = () => {
           <Background />
         </ReactFlow>
       </div>
+      {notification && <Notification message={notification} />}
     </div>
   );
 };

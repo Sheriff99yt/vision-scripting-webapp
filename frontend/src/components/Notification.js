@@ -1,17 +1,23 @@
-// Notification.js
-import React, { useEffect } from "react";
-import "./Notification.css"; // You can style your notification component here
+import React, { useState, useEffect } from 'react';
 
-const Notification = ({ message, onDismiss }) => {
+const Notification = ({ message, duration = 3000 }) => {
+  const [isVisible, setIsVisible] = useState(true);
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      onDismiss();
-    }, 3000); // Automatically dismiss after 3 seconds
+      setIsVisible(false);
+    }, duration);
 
     return () => clearTimeout(timer);
-  }, [onDismiss]);
+  }, [duration]);
 
-  return <div className="notification">{message}</div>;
+  if (!isVisible) return null;
+
+  return (
+    <div className="notification">
+      {message}
+    </div>
+  );
 };
 
 export default Notification;
