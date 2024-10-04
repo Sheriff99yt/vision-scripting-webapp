@@ -58,10 +58,15 @@ export const useUserSettings = ({
       return;
     }
 
-    const { nodes: pastedNodes, edges: pastedEdges, boundingBox } = clipboardData;
+    const { nodes: pastedNodes, edges: pastedEdges } = clipboardData;
 
-    const offsetX = (mousePosition.x - viewport.x) / viewport.zoom - boundingBox.minX;
-    const offsetY = (mousePosition.y - viewport.y) / viewport.zoom - boundingBox.minY;
+    // Find the top-left corner of the pasted nodes
+    const minX = Math.min(...pastedNodes.map(node => node.position.x));
+    const minY = Math.min(...pastedNodes.map(node => node.position.y));
+
+    // Calculate the offset to move the top-left corner to the mouse position
+    const offsetX = (mousePosition.x - viewport.x) / viewport.zoom - minX;
+    const offsetY = (mousePosition.y - viewport.y) / viewport.zoom - minY;
 
     const newNodes = pastedNodes.map(node => ({
       ...node,
