@@ -15,12 +15,6 @@ import Notification from './Notification';
 import "./styles.css";
 import { useNodeCreation } from './hooks/useNodeCreation';
 
-const nodeTypes = {
-  process: ProcessNode,
-  forLoop: ForLoopNode,
-};
-
-
 const VisualScripting = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -33,6 +27,8 @@ const VisualScripting = () => {
   const fileInputRef = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [notification, setNotification] = useState(null);
+  const [reactFlowInstance, setReactFlowInstance] = useState(null);
+  const mainCanvasRef = useRef(null);
 
   const availableNodeTypes = useMemo(() => [
     { type: "process", label: "Process" },
@@ -81,7 +77,6 @@ const VisualScripting = () => {
     [history, setNodes, setEdges]
   );
 
-
   const {
     handleKeyDown,
     pasteNode,
@@ -115,7 +110,6 @@ const VisualScripting = () => {
     showNotification(`${isDarkMode ? 'Light' : 'Dark'} mode activated`);
   };
 
-
   const loadFromFile = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -144,28 +138,45 @@ const VisualScripting = () => {
     }
   };
 
-  const createNode = useNodeCreation(setNodes, manageHistory);
-
-  const handleDrop = (event) => {
-    event.preventDefault();
-
-    const data = JSON.parse(
-      event.dataTransfer.getData("application/reactflow")
-    );
-    if (data) {
-      const { type } = data;
-      createNode(type, { x: event.clientX, y: event.clientY });
-    }
-  };
+  const createNode = useNodeCreation(setNodes, manageHistory, () => edges);
 
   const handleDragOver = (event) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
   };
 
+  const handleDrop = (event) => {
+    event.preventDefault();
+    
+    if (!mainCanvasRef.current || !reactFlowInstance) {
+      console.error('Main canvas ref or React Flow instance is not available');
+      return;
+    }
+
+    const reactFlowBounds = mainCanvasRef.current.getBoundingClientRect();
+    const type = event.dataTransfer.getData('application/reactflow');
+
+    // Check if the dropped element is valid
+    if (typeof type === 'undefined' || !type) {
+      return;
+    }
+
+    const position = reactFlowInstance.project({
+      x: event.clientX - reactFlowBounds.left,
+      y: event.clientY - reactFlowBounds.top,
+    });
+    
+    createNode(type, position);
+  };
+
   const handleMouseMove = (event) => {
     setMousePosition({ x: event.clientX, y: event.clientY });
   };
+
+  const nodeTypes = useMemo(() => ({
+    process: ProcessNode,
+    forLoop: ForLoopNode,
+  }), []);
 
   return (
     <div
@@ -180,7 +191,12 @@ const VisualScripting = () => {
         setSearchQuery={setSearchQuery}
         filteredNodeTypes={filteredNodeTypes}
       />
-      <div className="main-canvas" onDrop={handleDrop} onDragOver={handleDragOver}>
+      <div 
+        className="main-canvas" 
+        ref={mainCanvasRef}
+        onDrop={handleDrop} 
+        onDragOver={handleDragOver}
+      >
         <Toolbar
           toggleDarkMode={toggleDarkMode}
           saveToFile={saveToFile}
@@ -197,16 +213,21 @@ const VisualScripting = () => {
           showNotification={showNotification}
         />
         <ReactFlow
-          className="react-flow"
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onInit={setReactFlowInstance}
           fitView
           nodeTypes={nodeTypes}
           nodesDraggable
           onMove={(event, viewport) => setViewport(viewport)}
+          snapToGrid={true}
+          snapGrid={[15, 15]}
+          defaultZoom={1}
+          minZoom={0.1}
+          maxZoom={4}
         >
           <MiniMap />
           <Controls />
@@ -217,6 +238,5 @@ const VisualScripting = () => {
     </div>
   );
 };
-
 
 export default VisualScripting;

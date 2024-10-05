@@ -25,6 +25,8 @@ The Vision Visual Scripting Web App is a React-based application that provides a
 5. Optimize performance, especially for large workflows.
 
 ## To-Do List
+- [ ] Fix issue where edges are deleted upon creating a new node
+- [ ] Resolve animation not working for nodes and edges
 - [ ] Implement more node types (e.g., conditional, input/output nodes)
 - [ ] Enhance the UI/UX of the sidebar and toolbar
 - [ ] Add a node properties panel for detailed customization

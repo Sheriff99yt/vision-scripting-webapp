@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 
 const Sidebar = ({
   searchQuery,
@@ -7,20 +7,12 @@ const Sidebar = ({
   createNode,
 }) => {
   const handleDragStart = (event, type) => {
-    event.dataTransfer.setData(
-      "application/reactflow",
-      JSON.stringify({ type })
-    );
+    event.dataTransfer.setData("application/reactflow", type);
   };
 
   const handleClick = (type) => {
     createNode(type, { x: 100, y: 100 }); // Spawn node at default position
   };
-
-  useEffect(() => {
-    // This effect will run whenever searchQuery changes
-    console.log("Search query changed:", searchQuery);
-  }, [searchQuery]);
 
   return (
     <aside className="sidebar">

@@ -41,6 +41,17 @@
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.custom-node:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+  background-color: #3c3c3c;
+}
+
+.custom-node.selected {
+  box-shadow: 0 0 0 2px #ffd700;
 }
 
 .selected {
@@ -125,4 +136,30 @@ button:hover {
 .react-flow-container {
   flex: 1;
   position: relative;
+}
+
+.react-flow__node {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.react-flow__node-dragging {
+  opacity: 0.8;
+}
+
+.react-flow__edge {
+  transition: stroke 0.2s ease, opacity 0.2s ease;
+}
+
+.react-flow__edge:hover {
+  stroke: #ffd700;
+  stroke-width: 3;
+}
+
+.react-flow__edge-path {
+  transition: stroke 0.2s ease, stroke-width 0.2s ease;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: #ffd700;
+  stroke-width: 3;
 }
