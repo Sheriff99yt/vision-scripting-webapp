@@ -1,5 +1,5 @@
 // Toolbar.js
-import React, { useCallback, useRef } from "react";
+import React from "react";
 
 // Button configuration array
 const buttonsConfig = [

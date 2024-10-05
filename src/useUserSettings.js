@@ -166,6 +166,10 @@ export const useUserSettings = ({
             event.preventDefault();
             selectAllNodes();
             break;
+          case "d":
+            event.preventDefault();
+            deselectAllNodes();
+            break;
           case "z":
             event.preventDefault();
             if (event.shiftKey) {
@@ -184,6 +188,7 @@ export const useUserSettings = ({
       } else if (event.key === "Delete" || event.key === "Backspace") {
         deleteSelected();
       } else if (event.key === "Escape") {
+        event.preventDefault(); // Prevent default browser behavior
         deselectAllNodes();
       }
     },
