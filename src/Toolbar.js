@@ -16,7 +16,8 @@ const buttonsConfig = [
   { label: "Redo", onClick: "redo" },
 ];
 
-const ToolbarButton = ({
+
+const ToolbarButton = React.memo(({
   label,
   onClick,
   style,
@@ -32,13 +33,13 @@ const ToolbarButton = ({
       {label}
     </button>
   );
-};
+});
 
 const Toolbar = (props) => {
   const { fileInputRef } = props;
 
   return (
-    <div className="toolbar">
+    <div className="toolbar" role="toolbar" aria-label="Workflow Actions">
       {buttonsConfig.map(({ label, onClick, isFileInput }, index) => (
         <ToolbarButton
           key={index}
@@ -47,6 +48,7 @@ const Toolbar = (props) => {
           isFileInput={isFileInput}
           fileInputRef={fileInputRef}
           style={{ margin: "8px" }}
+          aria-label={label}
         />
       ))}
       <input
@@ -55,6 +57,7 @@ const Toolbar = (props) => {
         onChange={props.loadFromFile}
         style={{ display: "none" }}
         ref={fileInputRef}
+        aria-hidden="true"
       />
     </div>
   );

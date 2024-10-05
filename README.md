@@ -11,7 +11,6 @@ This project is a private implementation of a visual scripting web app, providin
 - **Toolbox Search:** An intuitive search function to quickly find and add different node types, streamlining the workflow creation process.
 - **Dynamic Ports:** Ensuring flexible port management for real-time connections, allowing users to add or remove connections seamlessly as workflows evolve.
 - **Undo/Redo Functionality:** Easily revert or reapply changes to your workflow.
-- **Clipboard Operations:** Copy, cut, and paste nodes and their connections within the workspace.
 
 ## Technologies Used
 - **Frontend:** Built with React 18 and styled using CSS, with plans to incorporate Tailwind CSS for responsive design and modern aesthetics.
@@ -59,6 +58,8 @@ This project is a private implementation of a visual scripting web app, providin
    - Ctrl/Cmd + Shift + Z or Ctrl/Cmd + Y: Redo
    - Delete: Remove selected nodes
    - Escape: Deselect all nodes
+   - Ctrl/Cmd + S: Save the current flow to a file
+   - Ctrl/Cmd + D: Deselect all nodes
 4. Save your work using the "Save" button and load it later with the "Load" button.
 
 ## Future Updates

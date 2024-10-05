@@ -26,6 +26,9 @@ export async function copy(nodes, edges) {
     return true;
   } catch (err) {
     console.error('Failed to write to clipboard: ', err);
+    if (err instanceof TypeError) {
+      console.warn('Clipboard API might not be supported in this environment');
+    }
     return false;
   }
 }
@@ -54,6 +57,9 @@ export async function paste() {
     return clipboardData;
   } catch (err) {
     console.error('Failed to read clipboard contents: ', err);
+    if (err instanceof SyntaxError) {
+      console.warn('Invalid JSON data in clipboard');
+    }
     return null;
   }
 }

@@ -7,18 +7,19 @@ import ReactFlow, {
   useEdgesState,
   addEdge,
 } from "react-flow-renderer";
-import { v4 as uuidv4 } from "uuid";
 import Sidebar from "./Sidebar";
 import Toolbar from "./Toolbar";
 import { ProcessNode, ForLoopNode } from "./NodeTypes";
 import { useUserSettings } from "./useUserSettings";
 import Notification from './Notification';
 import "./styles.css";
+import { useNodeCreation } from './hooks/useNodeCreation';
 
 const nodeTypes = {
   process: ProcessNode,
   forLoop: ForLoopNode,
 };
+
 
 const VisualScripting = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -47,15 +48,28 @@ const VisualScripting = () => {
     setFilteredNodeTypes(filtered);
   }, [searchQuery, availableNodeTypes]);
 
-  const showNotification = (message) => {
+  const showNotification = useCallback((message) => {
     setNotification(message);
     setTimeout(() => setNotification(null), 3000);
-  };
+  }, []);
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
     [setEdges]
   );
+
+  const saveToFile = useCallback(() => {
+    const data = JSON.stringify({ nodes, edges });
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "flow.json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showNotification('Flow saved to file');
+  }, [nodes, edges, showNotification]);
 
   const manageHistory = useCallback(
     (newNodes, newEdges) => {
@@ -66,6 +80,7 @@ const VisualScripting = () => {
     },
     [history, setNodes, setEdges]
   );
+
 
   const {
     handleKeyDown,
@@ -92,6 +107,7 @@ const VisualScripting = () => {
     mousePosition,
     viewport,
     showNotification,
+    saveToFile,
   });
 
   const toggleDarkMode = () => {
@@ -99,18 +115,6 @@ const VisualScripting = () => {
     showNotification(`${isDarkMode ? 'Light' : 'Dark'} mode activated`);
   };
 
-  const saveToFile = () => {
-    const data = JSON.stringify({ nodes, edges });
-    const blob = new Blob([data], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "flow.json";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showNotification('Flow saved to file');
-  };
 
   const loadFromFile = (event) => {
     const file = event.target.files[0];
@@ -140,19 +144,7 @@ const VisualScripting = () => {
     }
   };
 
-  const createNode = useCallback(
-    (type, position) => {
-      const newNode = {
-        id: uuidv4(),
-        type,
-        data: { label: type === "process" ? "Process" : "For Loop" },
-        position,
-      };
-      manageHistory([...nodes, newNode], edges);
-      showNotification(`New ${type} node created`);
-    },
-    [nodes, edges, manageHistory]
-  );
+  const createNode = useNodeCreation(setNodes, manageHistory);
 
   const handleDrop = (event) => {
     event.preventDefault();
@@ -205,6 +197,7 @@ const VisualScripting = () => {
           showNotification={showNotification}
         />
         <ReactFlow
+          className="react-flow"
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
@@ -224,5 +217,6 @@ const VisualScripting = () => {
     </div>
   );
 };
+
 
 export default VisualScripting;

@@ -55,7 +55,10 @@ The project follows a standard React application structure:
   - `VisualScripting.js`: Core component for the visual scripting interface
   - `NodeTypes.js`: Defines custom node types (Process and For Loop)
   - `Sidebar.js`: Component for the sidebar with node selection
+  - `Toolbar.js`: Component for the toolbar with action buttons
   - `useUserSettings.js`: Custom hook for user interactions and settings
+  - `hooks/useNodeCreation.js`: Custom hook for node creation
+  - `Notification.js`: Component for displaying notifications
   - `styles.css`: Global styles for the application
 
 ## Key Components
@@ -70,6 +73,7 @@ Key functionalities:
 - File saving and loading
 - Clipboard operations (copy, cut, paste)
 - Undo/Redo functionality
+- Drag and drop node creation
 
 ### NodeTypes
 
@@ -81,27 +85,42 @@ Currently supported node types:
 
 ### Sidebar
 
-Provides a searchable list of available node types for easy addition to the workflow.
+Implements the sidebar component with a searchable list of available node types.
+
+### Toolbar
+
+Implements the toolbar component with various action buttons for common operations.
 
 ### useUserSettings
 
 A custom hook that manages user interactions and settings.
 
+Key functionalities:
+- Keyboard shortcut handling
+- Clipboard operations
+- Node selection and deselection
+- Undo and Redo operations
+
+### useNodeCreation
+
+A custom hook that manages the creation of new nodes in the workflow.
+
+### Notification
+
+A component that displays non-intrusive notifications to provide user feedback.
+
 ## Styling
 
-The application uses CSS for styling, with support for both dark and light modes.
+The `styles.css` file contains the global styles for the application, including dark and light mode themes. It uses CSS variables for easy theme switching and maintains a consistent look and feel across the application.
 
-## Future Enhancements
+## Next Steps
 
-- Integration of FastAPI for backend functionality to handle user requests and improve performance.
-- Real-time collaboration through WebSockets, enabling multiple users to work on workflows simultaneously.
-- Enhanced node customization and further layout options to cater to a wider range of user needs.
-- AI-powered scripting assistance, providing tips and suggestions to optimize workflows and improve user efficiency.
+1. Implement more node types to expand the functionality of the visual scripting tool.
+2. Enhance the UI/UX of the sidebar and toolbar for better user interaction.
+3. Begin planning for backend integration with FastAPI.
+4. Start writing unit tests for existing components and functions.
+5. Implement TypeScript for improved type safety and developer experience.
+6. Optimize performance for large workflows, potentially implementing virtualization for node rendering.
+7. Enhance error handling and validation for node connections.
 
-## License
-
-This is a private project and should not be distributed without permission.
-
-## Conclusion
-
-The Vision Visual Scripting Web App builds upon the foundation of the original VVS project, offering a more accessible and powerful platform for visual scripting. With its intuitive interface and robust feature set, it provides users with a versatile tool for designing complex workflows and logic systems.
+For more detailed information about specific components and their implementations, please refer to the inline comments in the respective source files.

@@ -17,6 +17,7 @@ export const useUserSettings = ({
   mousePosition,
   viewport,
   showNotification,
+  saveToFile,
 }) => {
   const copyNode = useCallback(async () => {
     const selectedNodes = nodes.filter((node) => node.selected);
@@ -182,6 +183,10 @@ export const useUserSettings = ({
             event.preventDefault();
             redo();
             break;
+          case "s":
+            event.preventDefault();
+            saveToFile();
+            break;
           default:
             break;
         }
@@ -201,6 +206,7 @@ export const useUserSettings = ({
       deselectAllNodes,
       undo,
       redo,
+      saveToFile,
     ]
   );
 

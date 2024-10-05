@@ -1,9 +1,12 @@
-/* VisualScripting.css */
-
 /* General App Styles */
 .app-container {
   display: flex;
   height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
   transition: background-color 0.3s ease;
 }
 
@@ -25,9 +28,10 @@
 }
 
 .main-canvas {
-  flex-grow: 1;
-  position: relative;
-  overflow: hidden; /* Prevent internal scrolling */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .custom-node {
@@ -116,4 +120,9 @@ button:hover {
 @keyframes fadeOut {
   from { opacity: 1; transform: translate(-50%, 0); }
   to { opacity: 0; transform: translate(-50%, 20px); }
+}
+
+.react-flow-container {
+  flex: 1;
+  position: relative;
 }
