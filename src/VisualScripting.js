@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -11,9 +11,9 @@ import { v4 as uuidv4 } from "uuid";
 import Sidebar from "./Sidebar";
 import Toolbar from "./Toolbar";
 import { ProcessNode, ForLoopNode } from "./NodeTypes";
-import { useUserSettings } from "./userSettings";
+import { useUserSettings } from "./useUserSettings";
 import Notification from './Notification';
-import "./VisualScripting.css";
+import "./styles.css";
 
 const nodeTypes = {
   process: ProcessNode,
@@ -33,10 +33,10 @@ const VisualScripting = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [notification, setNotification] = useState(null);
 
-  const availableNodeTypes = [
+  const availableNodeTypes = useMemo(() => [
     { type: "process", label: "Process" },
     { type: "forLoop", label: "For Loop" },
-  ];
+  ], []);
 
   const [filteredNodeTypes, setFilteredNodeTypes] = useState(availableNodeTypes);
 
@@ -45,7 +45,7 @@ const VisualScripting = () => {
       node.label.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredNodeTypes(filtered);
-  }, [searchQuery]);
+  }, [searchQuery, availableNodeTypes]);
 
   const showNotification = (message) => {
     setNotification(message);

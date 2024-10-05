@@ -1,6 +1,6 @@
 // src/App.js
 import React from 'react';
-import VisualScripting from './components/VisualScripting';
+import VisualScripting from './VisualScripting';
 
 function App() {
     return (

@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { copy, paste } from "../utils/clipboard";
+import { copy, paste } from "./clipboard";
 
 export const useUserSettings = ({
   nodes,

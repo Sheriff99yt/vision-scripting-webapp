@@ -1,8 +1,11 @@
-# Vision Visual Scripting Web App
+# Vision Visual Scripting Web App Documentation
 
-This project is a private implementation of a visual scripting web app, providing users with a node-based interface for designing and connecting workflows. The app emphasizes a user-friendly, visually appealing UI with customizable dark and light modes. It serves as a powerful tool for both beginners and advanced users, allowing seamless development of complex logic through an intuitive graphical interface.
+## Introduction
+
+Vision Visual Scripting Web App is an advanced, web-based visual scripting tool that allows users to design and connect workflows through an intuitive node-based interface. This project is the successor to the original Vision Visual Scripting (VVS) graduation project, now reimagined as a powerful web application.
 
 ## Features
+
 - **Node-Based Design:** Easily create, edit, and link nodes to develop workflows. Users can drag nodes from a toolbox and connect them with lines to define logic and data flow.
 - **Dark/Light Mode Toggle:** Switch between dark and light modes for optimal viewing, ensuring comfort during prolonged use and accommodating user preferences.
 - **Local Save/Load Functionality:** Save and load scripts from local JSON files, allowing users to work offline and manage their projects efficiently.
@@ -10,16 +13,19 @@ This project is a private implementation of a visual scripting web app, providin
 - **Real-Time Node Management:** Drag and drop nodes to design workflows interactively, with immediate updates and feedback provided by the UI.
 - **Toolbox Search:** An intuitive search function to quickly find and add different node types, streamlining the workflow creation process.
 - **Dynamic Ports:** Ensuring flexible port management for real-time connections, allowing users to add or remove connections seamlessly as workflows evolve.
-- **Undo/Redo Functionality:** Easily revert or reapply changes to your workflow.
-- **Clipboard Operations:** Copy, cut, and paste nodes and their connections within the workspace.
 
-## Technologies Used
-- **Frontend:** Built with React 18 and styled using CSS, with plans to incorporate Tailwind CSS for responsive design and modern aesthetics.
-- **Node Management:** Utilizes react-flow-renderer (v10.3.17) for the interactive node-based interface.
-- **Data Storage:** Implements local storage and file system for saving and loading projects.
-- **State Management:** Custom hooks for managing user settings and interactions.
+## Technology Stack
 
-## Installation
+### Frontend
+- React (v18.3.1)
+- react-flow-renderer (v10.3.17) for node-based interface
+- CSS for styling (with plans to incorporate Tailwind CSS)
+
+### Backend
+- Currently using local storage and file system
+- Future plans include integrating FastAPI for enhanced data handling and processing
+
+## Installation and Setup
 
 1. Clone the repository:
    ```bash
@@ -40,6 +46,10 @@ This project is a private implementation of a visual scripting web app, providin
    The app will run on `http://localhost:3000`. You can access it via your web browser and begin designing your workflows immediately.
 
 ## Project Structure
+
+The project follows a standard React application structure:
+
+- `public/`: Contains the HTML template and public assets
 - `src/`: Contains the React components and application logic
   - `App.js`: The main application component
   - `VisualScripting.js`: Core component for the visual scripting interface
@@ -48,29 +58,50 @@ This project is a private implementation of a visual scripting web app, providin
   - `useUserSettings.js`: Custom hook for user interactions and settings
   - `styles.css`: Global styles for the application
 
-## Usage
-1. Use the sidebar to search and add nodes to your workspace.
-2. Drag and connect nodes to create your workflow.
-3. Utilize keyboard shortcuts for quick actions:
-   - Ctrl/Cmd + C: Copy selected nodes
-   - Ctrl/Cmd + X: Cut selected nodes
-   - Ctrl/Cmd + V: Paste copied/cut nodes
-   - Ctrl/Cmd + Z: Undo
-   - Ctrl/Cmd + Shift + Z or Ctrl/Cmd + Y: Redo
-   - Delete: Remove selected nodes
-   - Escape: Deselect all nodes
-4. Save your work using the "Save" button and load it later with the "Load" button.
+## Key Components
 
-## Future Updates
+### VisualScripting
+
+The main component that orchestrates the visual scripting interface.
+
+Key functionalities:
+- Node and edge management
+- Dark/Light mode toggle
+- File saving and loading
+- Clipboard operations (copy, cut, paste)
+- Undo/Redo functionality
+
+### NodeTypes
+
+Defines custom node types used in the application.
+
+Currently supported node types:
+- Process Node
+- For Loop Node
+
+### Sidebar
+
+Provides a searchable list of available node types for easy addition to the workflow.
+
+### useUserSettings
+
+A custom hook that manages user interactions and settings.
+
+## Styling
+
+The application uses CSS for styling, with support for both dark and light modes.
+
+## Future Enhancements
+
 - Integration of FastAPI for backend functionality to handle user requests and improve performance.
 - Real-time collaboration through WebSockets, enabling multiple users to work on workflows simultaneously.
 - Enhanced node customization and further layout options to cater to a wider range of user needs.
 - AI-powered scripting assistance, providing tips and suggestions to optimize workflows and improve user efficiency.
 
 ## License
-This is a private project. Please do not distribute without permission.
 
-## Documentation
-For more detailed information about the project structure, components, and functionalities, please refer to the `DOCUMENTATION.md` file in the project root.
+This is a private project and should not be distributed without permission.
 
----
+## Conclusion
+
+The Vision Visual Scripting Web App builds upon the foundation of the original VVS project, offering a more accessible and powerful platform for visual scripting. With its intuitive interface and robust feature set, it provides users with a versatile tool for designing complex workflows and logic systems.
