@@ -12,8 +12,6 @@ const buttonsConfig = [
   { label: "Delete", onClick: "deleteSelected" },
   { label: "Select All", onClick: "selectAllNodes" },
   { label: "Deselect All", onClick: "deselectAllNodes" },
-  { label: "Undo", onClick: "undo" },
-  { label: "Redo", onClick: "redo" },
 ];
 
 

@@ -50,13 +50,8 @@
   background-color: #3c3c3c;
 }
 
-.custom-node.selected {
-  box-shadow: 0 0 0 2px #ffd700;
-}
 
-.selected {
-  border: 2px solid yellow;
-}
+
 
 .react-flow__handle {
   background: #555;
@@ -139,27 +134,20 @@ button:hover {
 }
 
 .react-flow__node {
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition: all 0.3s ease;
 }
 
-.react-flow__node-dragging {
-  opacity: 0.8;
+.react-flow__node:hover {
+  transform: scale(1.05);
 }
 
 .react-flow__edge {
-  transition: stroke 0.2s ease, opacity 0.2s ease;
+  transition: all 0.3s ease;
 }
 
-.react-flow__edge:hover {
-  stroke: #ffd700;
-  stroke-width: 3;
-}
+
 
 .react-flow__edge-path {
-  transition: stroke 0.2s ease, stroke-width 0.2s ease;
+  transition: all 0.3s ease;
 }
 
-.react-flow__edge.selected .react-flow__edge-path {
-  stroke: #ffd700;
-  stroke-width: 3;
-}

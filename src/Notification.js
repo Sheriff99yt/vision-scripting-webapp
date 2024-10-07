@@ -1,21 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import './Notification.css';
 
-const Notification = ({ message, duration = 3000 }) => {
-  const [isVisible, setIsVisible] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(false);
-    }, duration);
-
-    return () => clearTimeout(timer);
-  }, [duration]);
-
-  if (!isVisible) return null;
-
+const Notification = ({ message }) => {
   return (
     <div className="notification">
-      {message}
+      <p>{message}</p>
     </div>
   );
 };

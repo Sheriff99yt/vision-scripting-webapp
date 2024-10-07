@@ -1,10 +1,10 @@
 import React from "react";
 
 const Sidebar = ({
+  createNode,
   searchQuery,
   setSearchQuery,
   filteredNodeTypes,
-  createNode,
 }) => {
   const handleDragStart = (event, type) => {
     event.dataTransfer.setData("application/reactflow", type);
@@ -18,6 +18,8 @@ const Sidebar = ({
     <aside className="sidebar">
       <input
         type="text"
+        id="node-search"
+        name="node-search"
         placeholder="Search..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}

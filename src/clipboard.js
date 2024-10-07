@@ -11,39 +11,54 @@ export async function copy(nodes, edges) {
       return false;
     }
 
+    const boundingBox = calculateBoundingBox(nodes);
     const clipboardData = {
       nodes: nodes.map(node => ({
-        id: node.id,
-        type: node.type,
-        position: { x: node.position.x, y: node.position.y },
-        data: node.data
+        ...node,
+        position: { 
+          x: node.position.x - boundingBox.minX,
+          y: node.position.y - boundingBox.minY
+        }
       })),
-      edges: edges,
-      boundingBox: calculateBoundingBox(nodes)
+      edges: edges.filter(edge => 
+        nodes.some(node => node.id === edge.source) && 
+        nodes.some(node => node.id === edge.target)
+      ),
+      boundingBox: boundingBox
     };
 
     await navigator.clipboard.writeText(JSON.stringify(clipboardData));
     return true;
   } catch (err) {
     console.error('Failed to write to clipboard: ', err);
-    if (err instanceof TypeError) {
-      console.warn('Clipboard API might not be supported in this environment');
-    }
     return false;
   }
 }
 
-export async function paste() {
+export async function cut(nodes, edges, updateFlow) {
+  const success = await copy(nodes, edges);
+  if (success) {
+    const updatedNodes = nodes.filter(node => !nodes.some(n => n.id === node.id));
+    const updatedEdges = edges.filter(edge => 
+      !nodes.some(node => node.id === edge.source || node.id === edge.target)
+    );
+    updateFlow(updatedNodes, updatedEdges);
+    return true;
+  }
+  return false;
+}
+
+export async function paste(mousePosition, viewport, updateFlow) {
   try {
     if (!navigator.clipboard) {
       console.warn('Clipboard API not available');
-      return null;
+      return false;
     }
 
     const permission = await navigator.permissions.query({ name: 'clipboard-read' });
     if (permission.state === 'denied') {
       console.warn('Clipboard read permission denied');
-      return null;
+      return false;
     }
 
     const text = await navigator.clipboard.readText();
@@ -51,16 +66,43 @@ export async function paste() {
 
     if (!isValidClipboardData(clipboardData)) {
       console.warn('Invalid clipboard data');
-      return null;
+      return false;
     }
 
-    return clipboardData;
+    const { nodes: pastedNodes, edges: pastedEdges, boundingBox } = clipboardData;
+
+    const pasteX = (mousePosition.x - viewport.x) / viewport.zoom;
+    const pasteY = (mousePosition.y - viewport.y) / viewport.zoom;
+
+    const offsetX = pasteX - boundingBox.minX;
+    const offsetY = pasteY - boundingBox.minY;
+
+    const newNodes = pastedNodes.map(node => ({
+      ...node,
+      id: generateUniqueId(),
+      position: {
+        x: node.position.x + offsetX,
+        y: node.position.y + offsetY,
+      },
+    }));
+
+    const idMap = pastedNodes.reduce((map, node, index) => {
+      map[node.id] = newNodes[index].id;
+      return map;
+    }, {});
+
+    const newEdges = pastedEdges.map(edge => ({
+      ...edge,
+      id: generateUniqueId(),
+      source: idMap[edge.source],
+      target: idMap[edge.target],
+    }));
+
+    updateFlow(prevNodes => [...prevNodes, ...newNodes], prevEdges => [...prevEdges, ...newEdges]);
+    return true;
   } catch (err) {
-    console.error('Failed to read clipboard contents: ', err);
-    if (err instanceof SyntaxError) {
-      console.warn('Invalid JSON data in clipboard');
-    }
-    return null;
+    console.error('Failed to paste from clipboard: ', err);
+    return false;
   }
 }
 
@@ -91,4 +133,8 @@ function isValidClipboardData(data) {
     typeof data.boundingBox.maxX === 'number' &&
     typeof data.boundingBox.maxY === 'number'
   );
+}
+
+function generateUniqueId() {
+  return Math.random().toString(36).substr(2, 9);
 }

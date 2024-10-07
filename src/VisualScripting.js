@@ -3,30 +3,58 @@ import ReactFlow, {
   MiniMap,
   Controls,
   Background,
-  useNodesState,
-  useEdgesState,
   addEdge,
+  applyNodeChanges,
+  applyEdgeChanges,
 } from "react-flow-renderer";
 import Sidebar from "./Sidebar";
 import Toolbar from "./Toolbar";
 import { ProcessNode, ForLoopNode } from "./NodeTypes";
 import { useUserSettings } from "./useUserSettings";
-import Notification from './Notification';
 import "./styles.css";
 import { useNodeCreation } from './hooks/useNodeCreation';
+import Notification from './Notification';
 
 const VisualScripting = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const showNotification = useCallback((message) => {
+    setNotification(message);
+    setTimeout(() => setNotification(null), 3000);
+  }, []);
+
+  const [nodes, setNodes] = useState([]);
+  const [edges, setEdges] = useState([]);
+
+  const updateFlow = useCallback((newNodes, newEdges) => {
+    setNodes(newNodes);
+    setEdges(newEdges);
+  }, []);
+
+  const createNode = useNodeCreation(updateFlow, nodes, edges);
+
+  const onNodesChange = useCallback((changes) => {
+    const newNodes = applyNodeChanges(changes, nodes);
+    const isNodeMovement = changes.some(change => change.type === 'position');
+    updateFlow(newNodes, edges, !isNodeMovement, !isNodeMovement);
+  }, [nodes, edges, updateFlow]);
+
+  const onEdgesChange = useCallback(
+    (changes) => {
+      const newEdges = applyEdgeChanges(changes, edges);
+      updateFlow(nodes, newEdges, true, true);
+    },
+    [nodes, edges, updateFlow]
+  );
+
+  const onNodeDragStop = useCallback(() => {
+    updateFlow(nodes, edges, true); // Record history after drag stops
+  }, [nodes, edges, updateFlow]);
+
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [history, setHistory] = useState([{ nodes: [], edges: [] }]);
-  const [futureHistory, setFutureHistory] = useState([]);
   const [copiedNodes, setCopiedNodes] = useState([]);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [viewport, setViewport] = useState({ x: 0, y: 0, zoom: 1 });
   const fileInputRef = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [notification, setNotification] = useState(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const mainCanvasRef = useRef(null);
 
@@ -44,14 +72,12 @@ const VisualScripting = () => {
     setFilteredNodeTypes(filtered);
   }, [searchQuery, availableNodeTypes]);
 
-  const showNotification = useCallback((message) => {
-    setNotification(message);
-    setTimeout(() => setNotification(null), 3000);
-  }, []);
-
   const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
+    (params) => {
+      const newEdges = addEdge(params, edges);
+      updateFlow(nodes, newEdges);
+    },
+    [nodes, edges, updateFlow]
   );
 
   const saveToFile = useCallback(() => {
@@ -67,16 +93,6 @@ const VisualScripting = () => {
     showNotification('Flow saved to file');
   }, [nodes, edges, showNotification]);
 
-  const manageHistory = useCallback(
-    (newNodes, newEdges) => {
-      setNodes(newNodes);
-      setEdges(newEdges);
-      setHistory([...history, { nodes: newNodes, edges: newEdges }]);
-      setFutureHistory([]);
-    },
-    [history, setNodes, setEdges]
-  );
-
   const {
     handleKeyDown,
     pasteNode,
@@ -85,24 +101,18 @@ const VisualScripting = () => {
     deleteSelected,
     selectAllNodes,
     deselectAllNodes,
-    undo,
-    redo,
+    selectNode,
   } = useUserSettings({
     nodes,
     edges,
-    setNodes,
-    setEdges,
-    manageHistory,
-    history,
-    setHistory,
-    futureHistory,
-    setFutureHistory,
+    updateFlow,
     copiedNodes,
     setCopiedNodes,
     mousePosition,
     viewport,
     showNotification,
     saveToFile,
+    createNode,
   });
 
   const toggleDarkMode = () => {
@@ -121,7 +131,7 @@ const VisualScripting = () => {
             Array.isArray(loadedData.nodes) &&
             Array.isArray(loadedData.edges)
           ) {
-            manageHistory(loadedData.nodes, loadedData.edges);
+            updateFlow(loadedData.nodes, loadedData.edges);
             showNotification("Flow loaded from file!");
           } else {
             showNotification("Invalid data format in the file.");
@@ -137,8 +147,6 @@ const VisualScripting = () => {
       console.warn("No file selected.");
     }
   };
-
-  const createNode = useNodeCreation(setNodes, manageHistory, () => edges);
 
   const handleDragOver = (event) => {
     event.preventDefault();
@@ -156,7 +164,6 @@ const VisualScripting = () => {
     const reactFlowBounds = mainCanvasRef.current.getBoundingClientRect();
     const type = event.dataTransfer.getData('application/reactflow');
 
-    // Check if the dropped element is valid
     if (typeof type === 'undefined' || !type) {
       return;
     }
@@ -166,7 +173,7 @@ const VisualScripting = () => {
       y: event.clientY - reactFlowBounds.top,
     });
     
-    createNode(type, position);
+    createNode(type, position, true);  // Pass true to clear future array when user creates a node
   };
 
   const handleMouseMove = (event) => {
@@ -177,6 +184,21 @@ const VisualScripting = () => {
     process: ProcessNode,
     forLoop: ForLoopNode,
   }), []);
+
+  const handleSelectionChange = useCallback((params) => {
+    const selectedNodes = params.nodes;
+    if (selectedNodes.length === 1) {
+      selectNode(selectedNodes[0].id);
+    } else if (selectedNodes.length > 1) {
+      const updatedNodes = nodes.map((node) => ({
+        ...node,
+        selected: selectedNodes.some((n) => n.id === node.id),
+      }));
+      updateFlow(updatedNodes, edges, false);
+    } else {
+      deselectAllNodes();
+    }
+  }, [nodes, edges, updateFlow, selectNode, deselectAllNodes]);
 
   return (
     <div
@@ -208,12 +230,16 @@ const VisualScripting = () => {
           deleteSelected={deleteSelected}
           selectAllNodes={selectAllNodes}
           deselectAllNodes={deselectAllNodes}
-          undo={undo}
-          redo={redo}
           showNotification={showNotification}
         />
         <ReactFlow
-          nodes={nodes}
+          nodes={nodes.map(node => ({
+            ...node,
+            position: {
+              x: isNaN(node.position.x) ? 0 : node.position.x,
+              y: isNaN(node.position.y) ? 0 : node.position.y,
+            },
+          }))}
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
@@ -221,13 +247,15 @@ const VisualScripting = () => {
           onInit={setReactFlowInstance}
           fitView
           nodeTypes={nodeTypes}
-          nodesDraggable
-          onMove={(event, viewport) => setViewport(viewport)}
+          nodesDraggable={true}
+          onMove={setViewport}
           snapToGrid={true}
           snapGrid={[15, 15]}
           defaultZoom={1}
           minZoom={0.1}
           maxZoom={4}
+          onSelectionChange={handleSelectionChange}
+          onNodeDragStop={onNodeDragStop}
         >
           <MiniMap />
           <Controls />

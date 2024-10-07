@@ -1,7 +1,7 @@
 # Vision Visual Scripting Web App - Project Status
 
 ## Current Status
-The Vision Visual Scripting Web App is a React-based application that provides a node-based interface for designing and connecting workflows. The project is currently in active development, with core functionalities implemented and ready for further enhancements.
+The Vision Visual Scripting Web App is a React-based application that provides a node-based interface for designing and connecting workflows. The project has implemented core functionalities and is ready for further enhancements.
 
 ## Key Features Implemented
 - Node-based design interface
@@ -32,7 +32,6 @@ The Vision Visual Scripting Web App is a React-based application that provides a
 - [ ] Add a node properties panel for detailed customization
 - [ ] Implement zoom and pan controls for the main canvas
 - [ ] Create a user guide or tutorial for new users
-- [x] Add keyboard shortcuts for common actions
 - [ ] Implement error handling and validation for node connections
 - [ ] Optimize performance for large workflows
 - [ ] Add unit tests for critical components and functions
